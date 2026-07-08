@@ -73,42 +73,43 @@ async function initDashboard() {
     try {
         let menuLoaded = false;
         
-        // 1. Tenta buscar do localStorage (modificações personalizadas)
-        const customMenu = localStorage.getItem('andreia_menu_custom');
-        if (customMenu) {
-            try {
-                menuData = JSON.parse(customMenu);
-                if (Array.isArray(menuData) && menuData.length > 0) {
-                    menuLoaded = true;
-                    console.log('Cardápio carregado de modificações locais (localStorage)');
-                }
-            } catch (e) {
-                console.warn('Erro ao carregar cardápio personalizado do localStorage:', e);
-            }
-        }
-        
-        // 2. Tenta buscar da API do servidor
-        if (!menuLoaded) {
-            try {
-                const response = await fetch('/api/menu');
-                if (response && response.ok) {
-                    const contentType = response.headers.get('content-type');
-                    if (contentType && contentType.includes('application/json')) {
-                        menuData = await response.json();
-                        if (Array.isArray(menuData)) {
-                            menuLoaded = true;
-                        }
+        // 1. Tenta buscar da API do servidor (com cache buster)
+        try {
+            const response = await fetch('/api/menu?t=' + Date.now());
+            if (response && response.ok) {
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    menuData = await response.json();
+                    if (Array.isArray(menuData) && menuData.length > 0) {
+                        menuLoaded = true;
+                        console.log('Cardápio carregado da API do servidor');
                     }
                 }
-            } catch (e) {
-                console.warn('Erro ao carregar /api/menu no dashboard, tentando cardapio.json...', e);
+            }
+        } catch (e) {
+            console.warn('Erro ao carregar /api/menu no dashboard, tentando outras fontes...', e);
+        }
+        
+        // 2. Tenta buscar do localStorage (modificações personalizadas)
+        if (!menuLoaded) {
+            const customMenu = localStorage.getItem('andreia_menu_custom');
+            if (customMenu) {
+                try {
+                    menuData = JSON.parse(customMenu);
+                    if (Array.isArray(menuData) && menuData.length > 0) {
+                        menuLoaded = true;
+                        console.log('Cardápio carregado de modificações locais (localStorage)');
+                    }
+                } catch (e) {
+                    console.warn('Erro ao carregar cardápio personalizado do localStorage:', e);
+                }
             }
         }
         
-        // 3. Tenta cardapio.json
+        // 3. Tenta cardapio.json (com cache buster)
         if (!menuLoaded) {
             try {
-                const response = await fetch('cardapio.json');
+                const response = await fetch('cardapio.json?t=' + Date.now());
                 if (response && response.ok) {
                     menuData = await response.json();
                     if (Array.isArray(menuData)) {
@@ -159,7 +160,7 @@ function loadAvailableImages() {
     
     // Tenta carregar do servidor se disponível
     try {
-        fetch('/api/images')
+        fetch('/api/images?t=' + Date.now())
             .then(res => {
                 if (res.ok) {
                     const contentType = res.headers.get('content-type');
@@ -740,33 +741,33 @@ async function saveAllDataToServer() {
     const resetMenuBtn = document.getElementById('resetMenuBtn');
     if (resetMenuBtn) resetMenuBtn.style.display = 'block';
     
-    // Tenta primeiro salvar localmente se estiver em ambiente de desenvolvimento local
-    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-        try {
-            showToast('Salvando alterações localmente...', 'info');
-            const res = await fetch('/api/menu', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(menuData)
-            });
-            
-            if (res.ok) {
-                const contentType = res.headers.get('content-type');
-                if (contentType && contentType.includes('application/json')) {
-                    const data = await res.json();
-                    if (data && data.status === 'success') {
-                        showToast('Cardápio sincronizado localmente com sucesso!', 'success');
-                        hasUnsavedChanges = false;
-                        document.getElementById('saveChangesBtn').style.display = 'none';
-                        return;
-                    }
+    // Tenta primeiro salvar no servidor
+    try {
+        showToast('Salvando alterações no servidor...', 'info');
+        const res = await fetch('/api/menu', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(menuData)
+        });
+        
+        if (res.ok) {
+            const contentType = res.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                const data = await res.json();
+                if (data && data.status === 'success') {
+                    showToast('Cardápio sincronizado no servidor com sucesso!', 'success');
+                    hasUnsavedChanges = false;
+                    document.getElementById('saveChangesBtn').style.display = 'none';
+                    return;
                 }
             }
-        } catch (err) {
-            console.warn('Erro ao salvar localmente via API, tentando GitHub...', err);
+        } else {
+            throw new Error(`Servidor respondeu com status ${res.status}`);
         }
+    } catch (err) {
+        console.warn('Erro ao salvar no servidor via API, tentando GitHub...', err);
     }
     
     // Se não for localhost ou se a API local falhar, tenta salvar via GitHub

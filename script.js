@@ -24,46 +24,48 @@ async function loadMenu() {
     try {
         let menuLoaded = false;
         
-        // 1. Tenta buscar do localStorage (modificações customizadas feitas no admin)
-        const customMenu = localStorage.getItem('andreia_menu_custom');
-        if (customMenu) {
-            try {
-                menuData = JSON.parse(customMenu);
-                if (Array.isArray(menuData) && menuData.length > 0) {
-                    menuLoaded = true;
-                    console.log('Cardápio carregado de modificações locais (localStorage)');
-                }
-            } catch (e) {
-                console.warn('Erro ao carregar cardápio personalizado do localStorage:', e);
-            }
-        }
-        
-        // 2. Tenta buscar da API do servidor
-        if (!menuLoaded) {
-            try {
-                const response = await fetch('/api/menu');
-                if (response && response.ok) {
-                    const contentType = response.headers.get('content-type');
-                    if (contentType && contentType.includes('application/json')) {
-                        menuData = await response.json();
-                        if (Array.isArray(menuData)) {
-                            menuLoaded = true;
-                        }
+        // 1. Tenta buscar da API do servidor (com cache buster)
+        try {
+            const response = await fetch('/api/menu?t=' + Date.now());
+            if (response && response.ok) {
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    menuData = await response.json();
+                    if (Array.isArray(menuData) && menuData.length > 0) {
+                        menuLoaded = true;
+                        console.log('Cardápio carregado da API do servidor');
                     }
                 }
-            } catch (e) {
-                console.warn('Erro ao carregar /api/menu, tentando cardapio.json...', e);
+            }
+        } catch (e) {
+            console.warn('Erro ao carregar /api/menu, tentando outras fontes...', e);
+        }
+        
+        // 2. Tenta buscar do localStorage (modificações customizadas feitas no admin)
+        if (!menuLoaded) {
+            const customMenu = localStorage.getItem('andreia_menu_custom');
+            if (customMenu) {
+                try {
+                    menuData = JSON.parse(customMenu);
+                    if (Array.isArray(menuData) && menuData.length > 0) {
+                        menuLoaded = true;
+                        console.log('Cardápio carregado de modificações locais (localStorage)');
+                    }
+                } catch (e) {
+                    console.warn('Erro ao carregar cardápio personalizado do localStorage:', e);
+                }
             }
         }
         
-        // 3. Se não conseguiu carregar da API, tenta carregar o arquivo estático cardapio.json
+        // 3. Se não conseguiu carregar da API ou localStorage, tenta carregar o arquivo estático cardapio.json (com cache buster)
         if (!menuLoaded) {
             try {
-                const response = await fetch('cardapio.json');
+                const response = await fetch('cardapio.json?t=' + Date.now());
                 if (response && response.ok) {
                     menuData = await response.json();
-                    if (Array.isArray(menuData)) {
+                    if (Array.isArray(menuData) && menuData.length > 0) {
                         menuLoaded = true;
+                        console.log('Cardápio carregado do cardapio.json');
                     }
                 }
             } catch (corsErr) {
@@ -75,6 +77,7 @@ async function loadMenu() {
         if (!menuLoaded && window.cardapioData) {
             menuData = window.cardapioData;
             menuLoaded = true;
+            console.log('Cardápio carregado do window.cardapioData');
         }
 
         if (!menuLoaded) {

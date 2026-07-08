@@ -12,8 +12,9 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
         super().__init__(*args, directory=DIRECTORY, **kwargs)
 
     def do_GET(self):
-        # API endpoints
-        if self.path == '/api/menu':
+        # API endpoints (ignora query parameters para roteamento)
+        path = self.path.split('?')[0]
+        if path == '/api/menu':
             self.send_response(200)
             self.send_header('Content-type', 'application/json; charset=utf-8')
             self.end_headers()
@@ -22,7 +23,7 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                     self.wfile.write(f.read().encode('utf-8'))
             else:
                 self.wfile.write(json.dumps([]).encode('utf-8'))
-        elif self.path == '/api/images':
+        elif path == '/api/images':
             self.send_response(200)
             self.send_header('Content-type', 'application/json; charset=utf-8')
             self.end_headers()
@@ -41,7 +42,8 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             super().do_GET()
 
     def do_POST(self):
-        if self.path == '/api/menu':
+        path = self.path.split('?')[0]
+        if path == '/api/menu':
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)
             try:
@@ -57,7 +59,7 @@ class MyHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_header('Content-type', 'application/json')
                 self.end_headers()
                 self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode('utf-8'))
-        elif self.path == '/api/upload':
+        elif path == '/api/upload':
             try:
                 content_type = self.headers.get('Content-Type')
                 if not content_type or 'multipart/form-data' not in content_type:
