@@ -680,43 +680,152 @@ function handleModalSubmit(e) {
 }
 
 // ==========================================
-// SALVAR NO SERVIDOR (PERSISTÊNCIA)
+// SALVAR NO SERVIDOR (PERSISTÊNCIA & GITHUB)
 // ==========================================
+async function getGithubFileSha(repo, path, branch, token) {
+    const url = `https://api.github.com/repos/${repo}/contents/${path}?ref=${branch}`;
+    const response = await fetch(url, {
+        headers: {
+            'Authorization': `token ${token}`,
+            'Accept': 'application/vnd.github.v3+json'
+        }
+    });
+    if (response.ok) {
+        const data = await response.json();
+        return data.sha;
+    } else if (response.status === 404) {
+        return null;
+    } else {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.message || `Erro ao buscar SHA de ${path}`);
+    }
+}
+
+async function uploadToGithub(repo, path, branch, content, message, token, sha) {
+    const url = `https://api.github.com/repos/${repo}/contents/${path}`;
+    
+    // Converte a string para base64 com suporte a caracteres unicode (acentuação)
+    const base64Content = btoa(unescape(encodeURIComponent(content)));
+    
+    const body = {
+        message: message,
+        content: base64Content,
+        branch: branch
+    };
+    if (sha) {
+        body.sha = sha;
+    }
+    
+    const response = await fetch(url, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `token ${token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/vnd.github.v3+json'
+        },
+        body: JSON.stringify(body)
+    });
+    
+    if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.message || `Erro ao fazer upload de ${path}`);
+    }
+    return await response.json();
+}
+
 async function saveAllDataToServer() {
     // Salva no localStorage local imediatamente para persistência instantânea no navegador do admin
     localStorage.setItem('andreia_menu_custom', JSON.stringify(menuData));
-    hasUnsavedChanges = false;
-    document.getElementById('saveChangesBtn').style.display = 'none';
     
     const resetMenuBtn = document.getElementById('resetMenuBtn');
     if (resetMenuBtn) resetMenuBtn.style.display = 'block';
     
-    try {
-        showToast('Salvando alterações no navegador...', 'info');
-        
-        const res = await fetch('/api/menu', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(menuData)
-        });
-        
-        if (res.ok) {
-            const contentType = res.headers.get('content-type');
-            if (contentType && contentType.includes('application/json')) {
-                const data = await res.json();
-                if (data && data.status === 'success') {
-                    showToast('Cardápio sincronizado com o servidor com sucesso!', 'success');
-                    return;
+    // Tenta primeiro salvar localmente se estiver em ambiente de desenvolvimento local
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+        try {
+            showToast('Salvando alterações localmente...', 'info');
+            const res = await fetch('/api/menu', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(menuData)
+            });
+            
+            if (res.ok) {
+                const contentType = res.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    const data = await res.json();
+                    if (data && data.status === 'success') {
+                        showToast('Cardápio sincronizado localmente com sucesso!', 'success');
+                        hasUnsavedChanges = false;
+                        document.getElementById('saveChangesBtn').style.display = 'none';
+                        return;
+                    }
                 }
             }
+        } catch (err) {
+            console.warn('Erro ao salvar localmente via API, tentando GitHub...', err);
         }
-        throw new Error('Servidor estático');
-    } catch (err) {
-        showToast('Salvo localmente! Baixando arquivos para atualizar o GitHub...', 'success');
-        // Oferece fallback de download do arquivo JSON atualizado
+    }
+    
+    // Se não for localhost ou se a API local falhar, tenta salvar via GitHub
+    const savedConfig = localStorage.getItem('andreia_github_config');
+    if (!savedConfig) {
+        showToast('Integração com GitHub não configurada! Baixando backup...', 'error');
         downloadBackupJson();
+        return;
+    }
+    
+    let repo, token, branch;
+    try {
+        const config = JSON.parse(savedConfig);
+        repo = config.repo;
+        token = config.token;
+        branch = config.branch || 'main';
+    } catch (e) {
+        showToast('Erro ao ler configuração do GitHub! Baixando backup...', 'error');
+        downloadBackupJson();
+        return;
+    }
+    
+    if (!repo || !token) {
+        showToast('Configurações do GitHub incompletas! Baixando backup...', 'error');
+        downloadBackupJson();
+        return;
+    }
+    
+    const saveChangesBtn = document.getElementById('saveChangesBtn');
+    const originalText = saveChangesBtn.innerText;
+    saveChangesBtn.innerText = 'Salvando...';
+    saveChangesBtn.disabled = true;
+    
+    try {
+        showToast('Sincronizando com o GitHub...', 'info');
+        
+        // 1. Enviar cardapio.json
+        showToast('Atualizando cardapio.json no GitHub...', 'info');
+        const jsonContent = JSON.stringify(menuData, null, 2);
+        const jsonSha = await getGithubFileSha(repo, 'cardapio.json', branch, token);
+        await uploadToGithub(repo, 'cardapio.json', branch, jsonContent, 'Atualização de cardapio.json via painel admin', token, jsonSha);
+        
+        // 2. Enviar cardapio-data.js
+        showToast('Atualizando cardapio-data.js no GitHub...', 'info');
+        const jsContent = 'window.cardapioData = ' + jsonContent + ';';
+        const jsSha = await getGithubFileSha(repo, 'cardapio-data.js', branch, token);
+        await uploadToGithub(repo, 'cardapio-data.js', branch, jsContent, 'Atualização de cardapio-data.js via painel admin', token, jsSha);
+        
+        showToast('Sucesso! O cardápio foi atualizado e o deploy na Vercel iniciará em instantes.', 'success');
+        
+        hasUnsavedChanges = false;
+        saveChangesBtn.style.display = 'none';
+    } catch (err) {
+        console.error(err);
+        showToast('Falha ao salvar no GitHub: ' + err.message + '. Baixando backup...', 'error');
+        downloadBackupJson();
+    } finally {
+        saveChangesBtn.innerText = originalText;
+        saveChangesBtn.disabled = false;
     }
 }
 
