@@ -21,11 +21,19 @@ function checkLogin() {
     const dashboardContainer = document.getElementById('dashboardContainer');
     const logoutBtn = document.getElementById('logoutBtn');
     const saveChangesBtn = document.getElementById('saveChangesBtn');
+    const resetMenuBtn = document.getElementById('resetMenuBtn');
     
     if (isLogged) {
         loginWrapper.style.display = 'none';
         dashboardContainer.classList.add('active');
         logoutBtn.style.display = 'block';
+        if (resetMenuBtn) {
+            if (localStorage.getItem('andreia_menu_custom')) {
+                resetMenuBtn.style.display = 'block';
+            } else {
+                resetMenuBtn.style.display = 'none';
+            }
+        }
         if (hasUnsavedChanges) saveChangesBtn.style.display = 'block';
         
         // Carrega dados se logado
@@ -35,6 +43,7 @@ function checkLogin() {
         dashboardContainer.classList.remove('active');
         logoutBtn.style.display = 'none';
         saveChangesBtn.style.display = 'none';
+        if (resetMenuBtn) resetMenuBtn.style.display = 'none';
     }
 }
 
@@ -64,23 +73,39 @@ async function initDashboard() {
     try {
         let menuLoaded = false;
         
-        // 1. Tenta buscar da API do servidor
-        try {
-            const response = await fetch('/api/menu');
-            if (response && response.ok) {
-                const contentType = response.headers.get('content-type');
-                if (contentType && contentType.includes('application/json')) {
-                    menuData = await response.json();
-                    if (Array.isArray(menuData)) {
-                        menuLoaded = true;
-                    }
+        // 1. Tenta buscar do localStorage (modificações personalizadas)
+        const customMenu = localStorage.getItem('andreia_menu_custom');
+        if (customMenu) {
+            try {
+                menuData = JSON.parse(customMenu);
+                if (Array.isArray(menuData) && menuData.length > 0) {
+                    menuLoaded = true;
+                    console.log('Cardápio carregado de modificações locais (localStorage)');
                 }
+            } catch (e) {
+                console.warn('Erro ao carregar cardápio personalizado do localStorage:', e);
             }
-        } catch (e) {
-            console.warn('Erro ao carregar /api/menu no dashboard, tentando cardapio.json...', e);
         }
         
-        // 2. Tenta cardapio.json
+        // 2. Tenta buscar da API do servidor
+        if (!menuLoaded) {
+            try {
+                const response = await fetch('/api/menu');
+                if (response && response.ok) {
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        menuData = await response.json();
+                        if (Array.isArray(menuData)) {
+                            menuLoaded = true;
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn('Erro ao carregar /api/menu no dashboard, tentando cardapio.json...', e);
+            }
+        }
+        
+        // 3. Tenta cardapio.json
         if (!menuLoaded) {
             try {
                 const response = await fetch('cardapio.json');
@@ -95,7 +120,7 @@ async function initDashboard() {
             }
         }
         
-        // 3. Tenta window.cardapioData
+        // 4. Tenta window.cardapioData
         if (!menuLoaded && window.cardapioData) {
             menuData = window.cardapioData;
             menuLoaded = true;
@@ -105,8 +130,8 @@ async function initDashboard() {
             throw new Error('Não foi possível carregar o cardápio de nenhuma fonte.');
         }
         
-        // Carrega imagens do servidor
-        await loadAvailableImages();
+        // Carrega imagens dinamicamente (não precisa de await)
+        loadAvailableImages();
         
         renderCategories();
         showToast('Dados carregados com sucesso!', 'success');
@@ -115,20 +140,60 @@ async function initDashboard() {
     }
 }
 
-async function loadAvailableImages() {
-    try {
-        const imgRes = await fetch('/api/images');
-        if (imgRes.ok) {
-            const contentType = imgRes.headers.get('content-type');
-            if (contentType && contentType.includes('application/json')) {
-                availableImages = await imgRes.json();
-                return;
+function loadAvailableImages() {
+    const defaultImages = ['logo.jpg', 'instagram-icon.png', 'whatsapp-button.png', 'Coxinha pequena.jpg'];
+    const scannedImages = [];
+    
+    // Escaneia imagens no menuData atual
+    if (Array.isArray(menuData)) {
+        menuData.forEach(cat => {
+            if (cat.products && Array.isArray(cat.products)) {
+                cat.products.forEach(prod => {
+                    if (prod.image && !scannedImages.includes(prod.image) && !defaultImages.includes(prod.image)) {
+                        scannedImages.push(prod.image);
+                    }
+                });
             }
-        }
-        throw new Error('API de imagens não disponível');
-    } catch (err) {
-        availableImages = ['logo.jpg', 'instagram-icon.png', 'whatsapp-button.png', 'Coxinha pequena.jpg'];
+        });
     }
+    
+    // Tenta carregar do servidor se disponível
+    try {
+        fetch('/api/images')
+            .then(res => {
+                if (res.ok) {
+                    const contentType = res.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        return res.json();
+                    }
+                }
+                throw new Error('Sem API');
+            })
+            .then(serverImgs => {
+                if (Array.isArray(serverImgs)) {
+                    serverImgs.forEach(img => {
+                        if (!scannedImages.includes(img) && !defaultImages.includes(img)) {
+                            scannedImages.push(img);
+                        }
+                    });
+                }
+                availableImages = [...scannedImages, ...defaultImages];
+                // Atualiza o seletor na tela se o modal de produto estiver aberto
+                const container = document.getElementById('adminImgSelector');
+                if (container) {
+                    const selectedOpt = container.querySelector('.img-option.selected');
+                    const selectedImg = selectedOpt ? selectedOpt.getAttribute('data-img') : null;
+                    renderImageSelector(selectedImg);
+                }
+            })
+            .catch(() => {
+                availableImages = [...scannedImages, ...defaultImages];
+            });
+    } catch (err) {
+        availableImages = [...scannedImages, ...defaultImages];
+    }
+    
+    availableImages = [...scannedImages, ...defaultImages];
 }
 
 // ==========================================
@@ -405,18 +470,82 @@ function addVariationRow(name = '', price = '') {
 }
 
 // ==========================================
-// UPLOAD DE IMAGEM VIA API
+// UPLOAD DE IMAGEM VIA API E COMPRESSÃO BASE64
 // ==========================================
+function compressAndConvertToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+                
+                // Limite máximo de tamanho (600px)
+                const MAX_WIDTH = 600;
+                const MAX_HEIGHT = 600;
+                
+                if (width > height) {
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+                } else {
+                    if (height > MAX_HEIGHT) {
+                        width *= MAX_HEIGHT / height;
+                        height = MAX_HEIGHT;
+                    }
+                }
+                
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                
+                // Preenche o fundo com branco (evita fundo preto em imagens PNG com transparência ao salvar em JPEG)
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, width, height);
+                ctx.drawImage(img, 0, 0, width, height);
+                
+                // Converte para Base64 em formato JPEG com compressão
+                try {
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.75);
+                    resolve(dataUrl);
+                } catch(e) {
+                    reject(e);
+                }
+            };
+            img.onerror = function() {
+                reject(new Error('Erro ao carregar a imagem para processamento.'));
+            };
+            img.src = event.target.result;
+        };
+        reader.onerror = function() {
+            reject(new Error('Erro ao ler o arquivo de imagem.'));
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
 async function handleImageUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
     
+    let compressedBase64 = null;
+    try {
+        showToast('Processando e comprimindo imagem...', 'info');
+        compressedBase64 = await compressAndConvertToBase64(file);
+    } catch (err) {
+        showToast('Erro ao processar imagem: ' + err.message, 'error');
+        return;
+    }
+    
+    // Tenta primeiro enviar para a API (se estiver rodando com o servidor python local)
     const formData = new FormData();
     formData.append('image', file);
     formData.append('filename', file.name);
     
     try {
-        showToast('Enviando imagem...', 'info');
         const res = await fetch('/api/upload', {
             method: 'POST',
             body: formData
@@ -424,17 +553,24 @@ async function handleImageUpload(e) {
         
         if (res.ok) {
             const data = await res.json();
-            showToast('Imagem enviada com sucesso!', 'success');
+            showToast('Imagem enviada para o servidor com sucesso!', 'success');
             
-            // Recarrega lista de imagens e seleciona a nova imagem
-            await loadAvailableImages();
+            // Adiciona a imagem carregada do servidor nas imagens disponíveis e renderiza
+            loadAvailableImages();
             renderImageSelector(data.filepath);
-        } else {
-            showToast('Erro no upload da imagem.', 'error');
+            return;
         }
     } catch (err) {
-        showToast('Erro de conexão: ' + err.message, 'error');
+        console.warn('Erro ao enviar imagem para a API (normal em hospedagem estática Vercel):', err);
     }
+    
+    // Se falhar a API (como na Vercel), usa a versão comprimida Base64
+    showToast('Upload indisponível. Usando imagem embutida (Base64)...', 'success');
+    
+    if (!availableImages.includes(compressedBase64)) {
+        availableImages.unshift(compressedBase64);
+    }
+    renderImageSelector(compressedBase64);
 }
 
 // ==========================================
@@ -547,8 +683,16 @@ function handleModalSubmit(e) {
 // SALVAR NO SERVIDOR (PERSISTÊNCIA)
 // ==========================================
 async function saveAllDataToServer() {
+    // Salva no localStorage local imediatamente para persistência instantânea no navegador do admin
+    localStorage.setItem('andreia_menu_custom', JSON.stringify(menuData));
+    hasUnsavedChanges = false;
+    document.getElementById('saveChangesBtn').style.display = 'none';
+    
+    const resetMenuBtn = document.getElementById('resetMenuBtn');
+    if (resetMenuBtn) resetMenuBtn.style.display = 'block';
+    
     try {
-        showToast('Salvando dados no servidor...', 'info');
+        showToast('Salvando alterações no navegador...', 'info');
         
         const res = await fetch('/api/menu', {
             method: 'POST',
@@ -563,16 +707,14 @@ async function saveAllDataToServer() {
             if (contentType && contentType.includes('application/json')) {
                 const data = await res.json();
                 if (data && data.status === 'success') {
-                    hasUnsavedChanges = false;
-                    document.getElementById('saveChangesBtn').style.display = 'none';
-                    showToast('Cardápio salvo no servidor com sucesso!', 'success');
+                    showToast('Cardápio sincronizado com o servidor com sucesso!', 'success');
                     return;
                 }
             }
         }
-        throw new Error('Servidor não respondeu como esperado (pode ser um ambiente de hospedagem estática).');
+        throw new Error('Servidor estático');
     } catch (err) {
-        showToast('Não foi possível salvar no servidor. Criando arquivo para download...', 'error');
+        showToast('Salvo localmente! Baixando arquivos para atualizar o GitHub...', 'success');
         // Oferece fallback de download do arquivo JSON atualizado
         downloadBackupJson();
     }
@@ -600,9 +742,7 @@ function downloadBackupJson() {
         dlAnchorJs.click();
     }, 300);
     
-    alert('As edições foram salvas apenas no seu navegador. Para persistir permanentemente no site:\n\n1. Baixe os arquivos "cardapio.json" e "cardapio-data.js" que abriram agora.\n2. Substitua os arquivos originais da pasta do cardápio pelos novos baixados.');
-    hasUnsavedChanges = false;
-    document.getElementById('saveChangesBtn').style.display = 'none';
+    alert('As edições foram salvas com sucesso no seu navegador!\n\nPara atualizar o site definitivamente na Vercel para todos os clientes:\n1. Substitua os arquivos "cardapio.json" e "cardapio-data.js" na pasta do seu projeto pelos novos baixados.\n2. Faça o envio (push) para o seu repositório no GitHub.');
 }
 
 function markUnsaved() {
@@ -622,6 +762,20 @@ function setupEventListeners() {
     
     // Botão Salvar Geral
     document.getElementById('saveChangesBtn').addEventListener('click', saveAllDataToServer);
+    
+    // Botão Restaurar Padrão
+    const resetMenuBtn = document.getElementById('resetMenuBtn');
+    if (resetMenuBtn) {
+        resetMenuBtn.addEventListener('click', () => {
+            if (confirm('Tem certeza que deseja descartar as alterações salvas localmente neste navegador e recarregar os dados do servidor?')) {
+                localStorage.removeItem('andreia_menu_custom');
+                showToast('Cache limpo! Recarregando dados...', 'info');
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            }
+        });
+    }
     
     // Modal fechar
     const closeAdminModal = document.getElementById('closeAdminModal');

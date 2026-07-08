@@ -24,23 +24,39 @@ async function loadMenu() {
     try {
         let menuLoaded = false;
         
-        // 1. Tenta buscar da API do servidor
-        try {
-            const response = await fetch('/api/menu');
-            if (response && response.ok) {
-                const contentType = response.headers.get('content-type');
-                if (contentType && contentType.includes('application/json')) {
-                    menuData = await response.json();
-                    if (Array.isArray(menuData)) {
-                        menuLoaded = true;
-                    }
+        // 1. Tenta buscar do localStorage (modificações customizadas feitas no admin)
+        const customMenu = localStorage.getItem('andreia_menu_custom');
+        if (customMenu) {
+            try {
+                menuData = JSON.parse(customMenu);
+                if (Array.isArray(menuData) && menuData.length > 0) {
+                    menuLoaded = true;
+                    console.log('Cardápio carregado de modificações locais (localStorage)');
                 }
+            } catch (e) {
+                console.warn('Erro ao carregar cardápio personalizado do localStorage:', e);
             }
-        } catch (e) {
-            console.warn('Erro ao carregar /api/menu, tentando cardapio.json...', e);
         }
         
-        // 2. Se não conseguiu carregar da API, tenta carregar o arquivo estático cardapio.json
+        // 2. Tenta buscar da API do servidor
+        if (!menuLoaded) {
+            try {
+                const response = await fetch('/api/menu');
+                if (response && response.ok) {
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        menuData = await response.json();
+                        if (Array.isArray(menuData)) {
+                            menuLoaded = true;
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn('Erro ao carregar /api/menu, tentando cardapio.json...', e);
+            }
+        }
+        
+        // 3. Se não conseguiu carregar da API, tenta carregar o arquivo estático cardapio.json
         if (!menuLoaded) {
             try {
                 const response = await fetch('cardapio.json');
@@ -55,7 +71,7 @@ async function loadMenu() {
             }
         }
         
-        // 3. Se ainda não carregou (caso do file:// sem CORS liberado), tenta usar o script carregado
+        // 4. Se ainda não carregou (caso do file:// sem CORS liberado), tenta usar o script carregado
         if (!menuLoaded && window.cardapioData) {
             menuData = window.cardapioData;
             menuLoaded = true;
