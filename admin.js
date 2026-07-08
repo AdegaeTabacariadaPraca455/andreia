@@ -62,13 +62,48 @@ function handleLogout() {
 // ==========================================
 async function initDashboard() {
     try {
-        // Carrega o cardápio
-        let menuRes = await fetch('/api/menu').catch(() => null);
-        if (!menuRes || !menuRes.ok) {
-            menuRes = await fetch('cardapio.json');
+        let menuLoaded = false;
+        
+        // 1. Tenta buscar da API do servidor
+        try {
+            const response = await fetch('/api/menu');
+            if (response && response.ok) {
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    menuData = await response.json();
+                    if (Array.isArray(menuData)) {
+                        menuLoaded = true;
+                    }
+                }
+            }
+        } catch (e) {
+            console.warn('Erro ao carregar /api/menu no dashboard, tentando cardapio.json...', e);
         }
-        if (!menuRes.ok) throw new Error('Não foi possível carregar o cardápio');
-        menuData = await menuRes.json();
+        
+        // 2. Tenta cardapio.json
+        if (!menuLoaded) {
+            try {
+                const response = await fetch('cardapio.json');
+                if (response && response.ok) {
+                    menuData = await response.json();
+                    if (Array.isArray(menuData)) {
+                        menuLoaded = true;
+                    }
+                }
+            } catch (corsErr) {
+                console.warn('Erro de CORS ao buscar cardapio.json no dashboard. Tentando window.cardapioData...');
+            }
+        }
+        
+        // 3. Tenta window.cardapioData
+        if (!menuLoaded && window.cardapioData) {
+            menuData = window.cardapioData;
+            menuLoaded = true;
+        }
+
+        if (!menuLoaded) {
+            throw new Error('Não foi possível carregar o cardápio de nenhuma fonte.');
+        }
         
         // Carrega imagens do servidor
         await loadAvailableImages();
@@ -84,10 +119,13 @@ async function loadAvailableImages() {
     try {
         const imgRes = await fetch('/api/images');
         if (imgRes.ok) {
-            availableImages = await imgRes.json();
-        } else {
-            availableImages = ['logo.jpg', 'instagram-icon.png', 'whatsapp-button.png', 'Coxinha pequena.jpg'];
+            const contentType = imgRes.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                availableImages = await imgRes.json();
+                return;
+            }
         }
+        throw new Error('API de imagens não disponível');
     } catch (err) {
         availableImages = ['logo.jpg', 'instagram-icon.png', 'whatsapp-button.png', 'Coxinha pequena.jpg'];
     }
@@ -521,12 +559,18 @@ async function saveAllDataToServer() {
         });
         
         if (res.ok) {
-            hasUnsavedChanges = false;
-            document.getElementById('saveChangesBtn').style.display = 'none';
-            showToast('Cardápio salvo no servidor com sucesso!', 'success');
-        } else {
-            throw new Error('Servidor retornou erro.');
+            const contentType = res.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                const data = await res.json();
+                if (data && data.status === 'success') {
+                    hasUnsavedChanges = false;
+                    document.getElementById('saveChangesBtn').style.display = 'none';
+                    showToast('Cardápio salvo no servidor com sucesso!', 'success');
+                    return;
+                }
+            }
         }
+        throw new Error('Servidor não respondeu como esperado (pode ser um ambiente de hospedagem estática).');
     } catch (err) {
         showToast('Não foi possível salvar no servidor. Criando arquivo para download...', 'error');
         // Oferece fallback de download do arquivo JSON atualizado
@@ -535,13 +579,28 @@ async function saveAllDataToServer() {
 }
 
 function downloadBackupJson() {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(menuData, null, 2));
-    const dlAnchorElem = document.createElement('a');
-    dlAnchorElem.setAttribute("href", dataStr);
-    dlAnchorElem.setAttribute("download", "cardapio.json");
-    dlAnchorElem.click();
+    const jsonStr = JSON.stringify(menuData, null, 2);
     
-    alert('As edições foram salvas apenas no seu navegador. Para persistir permanentemente no site:\n\n1. Baixe o arquivo "cardapio.json" que abriu agora.\n2. Substitua o arquivo "cardapio.json" original da pasta do cardápio pelo que você acabou de baixar.');
+    // 1. Baixar cardapio.json
+    const dataStrJson = "data:text/json;charset=utf-8," + encodeURIComponent(jsonStr);
+    const dlAnchorJson = document.createElement('a');
+    dlAnchorJson.setAttribute("href", dataStrJson);
+    dlAnchorJson.setAttribute("download", "cardapio.json");
+    dlAnchorJson.click();
+    
+    // 2. Baixar cardapio-data.js (para funcionamento via file://)
+    const jsContent = "window.cardapioData = " + jsonStr + ";";
+    const dataStrJs = "data:text/javascript;charset=utf-8," + encodeURIComponent(jsContent);
+    const dlAnchorJs = document.createElement('a');
+    dlAnchorJs.setAttribute("href", dataStrJs);
+    dlAnchorJs.setAttribute("download", "cardapio-data.js");
+    
+    // Pequeno delay para garantir que ambos os downloads iniciem no navegador
+    setTimeout(() => {
+        dlAnchorJs.click();
+    }, 300);
+    
+    alert('As edições foram salvas apenas no seu navegador. Para persistir permanentemente no site:\n\n1. Baixe os arquivos "cardapio.json" e "cardapio-data.js" que abriram agora.\n2. Substitua os arquivos originais da pasta do cardápio pelos novos baixados.');
     hasUnsavedChanges = false;
     document.getElementById('saveChangesBtn').style.display = 'none';
 }

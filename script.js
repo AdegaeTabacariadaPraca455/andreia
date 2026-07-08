@@ -22,14 +22,48 @@ document.addEventListener('DOMContentLoaded', () => {
 async function loadMenu() {
     const menuSections = document.getElementById('menuSections');
     try {
-        // Tenta buscar da API do servidor, com fallback para o arquivo local se der erro ou 404
-        let response = await fetch('/api/menu').catch(() => null);
-        if (!response || !response.ok) {
-            response = await fetch('cardapio.json');
-        }
-        if (!response.ok) throw new Error('Não foi possível carregar o cardápio');
+        let menuLoaded = false;
         
-        menuData = await response.json();
+        // 1. Tenta buscar da API do servidor
+        try {
+            const response = await fetch('/api/menu');
+            if (response && response.ok) {
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    menuData = await response.json();
+                    if (Array.isArray(menuData)) {
+                        menuLoaded = true;
+                    }
+                }
+            }
+        } catch (e) {
+            console.warn('Erro ao carregar /api/menu, tentando cardapio.json...', e);
+        }
+        
+        // 2. Se não conseguiu carregar da API, tenta carregar o arquivo estático cardapio.json
+        if (!menuLoaded) {
+            try {
+                const response = await fetch('cardapio.json');
+                if (response && response.ok) {
+                    menuData = await response.json();
+                    if (Array.isArray(menuData)) {
+                        menuLoaded = true;
+                    }
+                }
+            } catch (corsErr) {
+                console.warn('Erro de CORS ou rede ao buscar cardapio.json (comum no modo file://). Tentando window.cardapioData...');
+            }
+        }
+        
+        // 3. Se ainda não carregou (caso do file:// sem CORS liberado), tenta usar o script carregado
+        if (!menuLoaded && window.cardapioData) {
+            menuData = window.cardapioData;
+            menuLoaded = true;
+        }
+
+        if (!menuLoaded) {
+            throw new Error('Não foi possível carregar o cardápio de nenhuma fonte.');
+        }
         
         // Salva cópia local para fallback offline
         localStorage.setItem('andreia_menu_cache', JSON.stringify(menuData));
@@ -39,8 +73,12 @@ async function loadMenu() {
         console.warn('Erro ao carregar cardápio online, carregando do cache...', err);
         const cached = localStorage.getItem('andreia_menu_cache');
         if (cached) {
-            menuData = JSON.parse(cached);
-            renderMenu(menuData);
+            try {
+                menuData = JSON.parse(cached);
+                renderMenu(menuData);
+            } catch (jsonErr) {
+                menuSections.innerHTML = '<div class="loading-spinner">Erro ao carregar o cardápio. Verifique sua conexão.</div>';
+            }
         } else {
             menuSections.innerHTML = '<div class="loading-spinner">Erro ao carregar o cardápio. Verifique sua conexão.</div>';
         }
