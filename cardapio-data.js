@@ -1142,13 +1142,13 @@ window.cardapioData = [
   },
   {
     "id": "biscoitos",
-    "title": "Biscoitos, Rabanada e Especiais",
+    "title": "Biscoitos e Especiais",
     "products": [
       {
-        "title": "Biscoitos e Rabanada",
-        "description": "Biscoito doce c/ canela, polvilho sal e Rabanada",
+        "title": "Biscoitos",
+        "description": "Biscoito doce c/ canela, polvilho sal",
         "pricePrefix": "A partir de",
-        "price": "40,00",
+        "price": "50,00",
         "image": "IMG/Doces tradicionais.jpg",
         "variations": [
           {
@@ -1158,10 +1158,6 @@ window.cardapioData = [
           {
             "name": "Biscoito de polvilho sal",
             "price": "50,00 / Kg"
-          },
-          {
-            "name": "Rabanada",
-            "price": "40,00 / Kg"
           }
         ]
       },
@@ -1177,6 +1173,19 @@ window.cardapioData = [
             "price": "180,00"
           }
         ]
+      },
+      {
+        "title": "Petit Four Doce",
+        "description": "Petit four doce amanteigado recheado com goiabada",
+        "pricePrefix": "Kg",
+        "price": "69,00",
+        "image": "IMG/WhatsApp Image 2026-07-08 at 08.45.16 (1).jpeg",
+        "variations": [
+          {
+            "name": "Petit Four Doce",
+            "price": "69,00 / Kg"
+          }
+        ]
       }
     ]
   },
@@ -1190,5 +1199,19 @@ window.cardapioData = [
     "id": "bebidas-quentes-4672",
     "title": "Bebidas Quentes",
     "products": []
+  },
+  {
+    "id": "teste-de-antigravity-7413",
+    "title": "Teste de Antigravity",
+    "products": [
+      {
+        "title": "Coxinha de Teste",
+        "description": "Teste descritivo",
+        "pricePrefix": "A partir de",
+        "price": "10,00",
+        "image": "IMG/Esfirra.jpg",
+        "variations": []
+      }
+    ]
   }
 ];
