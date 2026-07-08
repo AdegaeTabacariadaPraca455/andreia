@@ -63,7 +63,11 @@ function handleLogout() {
 async function initDashboard() {
     try {
         // Carrega o cardápio
-        const menuRes = await fetch('/api/menu').catch(() => fetch('cardapio.json'));
+        let menuRes = await fetch('/api/menu').catch(() => null);
+        if (!menuRes || !menuRes.ok) {
+            menuRes = await fetch('cardapio.json');
+        }
+        if (!menuRes.ok) throw new Error('Não foi possível carregar o cardápio');
         menuData = await menuRes.json();
         
         // Carrega imagens do servidor

@@ -22,8 +22,11 @@ document.addEventListener('DOMContentLoaded', () => {
 async function loadMenu() {
     const menuSections = document.getElementById('menuSections');
     try {
-        // Tenta buscar da API do servidor, com fallback para o arquivo local
-        const response = await fetch('/api/menu').catch(() => fetch('cardapio.json'));
+        // Tenta buscar da API do servidor, com fallback para o arquivo local se der erro ou 404
+        let response = await fetch('/api/menu').catch(() => null);
+        if (!response || !response.ok) {
+            response = await fetch('cardapio.json');
+        }
         if (!response.ok) throw new Error('Não foi possível carregar o cardápio');
         
         menuData = await response.json();
