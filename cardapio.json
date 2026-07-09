@@ -216,23 +216,6 @@
             "price": "150,00"
           }
         ]
-      },
-      {
-        "title": "TESTE",
-        "description": "asdadsdadsasd",
-        "pricePrefix": "A partir de",
-        "price": "1000000",
-        "image": "IMG/baguete.jpg",
-        "variations": [
-          {
-            "name": "v1",
-            "price": "100"
-          },
-          {
-            "name": "v2",
-            "price": "1000"
-          }
-        ]
       }
     ]
   },

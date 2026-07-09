@@ -41,23 +41,7 @@ async function loadMenu() {
             console.warn('Erro ao carregar /api/menu, tentando outras fontes...', e);
         }
         
-        // 2. Tenta buscar do localStorage (modificações customizadas feitas no admin)
-        if (!menuLoaded) {
-            const customMenu = localStorage.getItem('andreia_menu_custom');
-            if (customMenu) {
-                try {
-                    menuData = JSON.parse(customMenu);
-                    if (Array.isArray(menuData) && menuData.length > 0) {
-                        menuLoaded = true;
-                        console.log('Cardápio carregado de modificações locais (localStorage)');
-                    }
-                } catch (e) {
-                    console.warn('Erro ao carregar cardápio personalizado do localStorage:', e);
-                }
-            }
-        }
-        
-        // 3. Se não conseguiu carregar da API ou localStorage, tenta carregar o arquivo estático cardapio.json (com cache buster)
+        // 2. Tenta carregar o arquivo estático cardapio.json (com cache buster)
         if (!menuLoaded) {
             try {
                 const response = await fetch('cardapio.json?t=' + Date.now());
@@ -73,7 +57,7 @@ async function loadMenu() {
             }
         }
         
-        // 4. Se ainda não carregou (caso do file:// sem CORS liberado), tenta usar o script carregado
+        // 3. Se ainda não carregou (caso do file:// sem CORS liberado), tenta usar o script carregado
         if (!menuLoaded && window.cardapioData) {
             menuData = window.cardapioData;
             menuLoaded = true;
@@ -84,23 +68,10 @@ async function loadMenu() {
             throw new Error('Não foi possível carregar o cardápio de nenhuma fonte.');
         }
         
-        // Salva cópia local para fallback offline
-        localStorage.setItem('andreia_menu_cache', JSON.stringify(menuData));
-        
         renderMenu(menuData);
     } catch (err) {
-        console.warn('Erro ao carregar cardápio online, carregando do cache...', err);
-        const cached = localStorage.getItem('andreia_menu_cache');
-        if (cached) {
-            try {
-                menuData = JSON.parse(cached);
-                renderMenu(menuData);
-            } catch (jsonErr) {
-                menuSections.innerHTML = '<div class="loading-spinner">Erro ao carregar o cardápio. Verifique sua conexão.</div>';
-            }
-        } else {
-            menuSections.innerHTML = '<div class="loading-spinner">Erro ao carregar o cardápio. Verifique sua conexão.</div>';
-        }
+        console.error('Erro ao carregar cardápio:', err);
+        menuSections.innerHTML = '<div class="loading-spinner">Erro ao carregar o cardápio. Verifique sua conexão.</div>';
     }
 }
 

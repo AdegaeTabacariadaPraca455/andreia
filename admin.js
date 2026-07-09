@@ -33,13 +33,7 @@ function checkLogin() {
         loginWrapper.style.display = 'none';
         dashboardContainer.classList.add('active');
         logoutBtn.style.display = 'block';
-        if (resetMenuBtn) {
-            if (localStorage.getItem('andreia_menu_custom')) {
-                resetMenuBtn.style.display = 'block';
-            } else {
-                resetMenuBtn.style.display = 'none';
-            }
-        }
+        if (resetMenuBtn) resetMenuBtn.style.display = 'none';
         if (hasUnsavedChanges) saveChangesBtn.style.display = 'block';
         
         // Carrega dados se logado
@@ -96,21 +90,7 @@ async function initDashboard() {
             console.warn('Erro ao carregar /api/menu no dashboard, tentando outras fontes...', e);
         }
         
-        // 2. Tenta buscar do localStorage (modificações personalizadas)
-        if (!menuLoaded) {
-            const customMenu = localStorage.getItem('andreia_menu_custom');
-            if (customMenu) {
-                try {
-                    menuData = JSON.parse(customMenu);
-                    if (Array.isArray(menuData) && menuData.length > 0) {
-                        menuLoaded = true;
-                        console.log('Cardápio carregado de modificações locais (localStorage)');
-                    }
-                } catch (e) {
-                    console.warn('Erro ao carregar cardápio personalizado do localStorage:', e);
-                }
-            }
-        }
+
         
         // 3. Tenta cardapio.json (com cache buster)
         if (!menuLoaded) {
@@ -741,11 +721,8 @@ async function uploadToGithub(repo, path, branch, content, message, token, sha) 
 }
 
 async function saveAllDataToServer() {
-    // Salva no localStorage local imediatamente para persistência instantânea no navegador do admin
-    localStorage.setItem('andreia_menu_custom', JSON.stringify(menuData));
-    
     const resetMenuBtn = document.getElementById('resetMenuBtn');
-    if (resetMenuBtn) resetMenuBtn.style.display = 'block';
+    if (resetMenuBtn) resetMenuBtn.style.display = 'none';
     
     // Tenta primeiro salvar no servidor
     try {
@@ -879,19 +856,7 @@ function setupEventListeners() {
     // Botão Salvar Geral
     document.getElementById('saveChangesBtn').addEventListener('click', saveAllDataToServer);
     
-    // Botão Restaurar Padrão
-    const resetMenuBtn = document.getElementById('resetMenuBtn');
-    if (resetMenuBtn) {
-        resetMenuBtn.addEventListener('click', () => {
-            if (confirm('Tem certeza que deseja descartar as alterações salvas localmente neste navegador e recarregar os dados do servidor?')) {
-                localStorage.removeItem('andreia_menu_custom');
-                showToast('Cache limpo! Recarregando dados...', 'info');
-                setTimeout(() => {
-                    location.reload();
-                }, 1000);
-            }
-        });
-    }
+
     
     // Modal fechar
     const closeAdminModal = document.getElementById('closeAdminModal');
