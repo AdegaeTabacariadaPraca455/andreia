@@ -216,14 +216,6 @@ window.cardapioData = [
             "price": "150,00"
           }
         ]
-      },
-      {
-        "title": "dd",
-        "description": "",
-        "pricePrefix": "A partir de",
-        "price": "35",
-        "image": "IMG/Bolos Redondos.jpg",
-        "variations": []
       }
     ]
   },
