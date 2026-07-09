@@ -6,15 +6,27 @@ let availableImages = [];
 let selectedCategoryId = null;
 let currentEditingItem = null; // { type: 'product'|'category', data: obj, index: int, parentId: str }
 let hasUnsavedChanges = false;
+let gitHubConfig = null; // Configuração global carregada do repositório
 
 // ==========================================
 // CONTROLE DE AUTENTICAÇÃO
 // ==========================================
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     // Exibe aviso se acessando via file://
     if (window.location.protocol === 'file:') {
         const warning = document.getElementById('fileProtocolWarning');
         if (warning) warning.style.display = 'block';
+    }
+    
+    // Tenta carregar as configurações do GitHub do repositório
+    try {
+        const response = await fetch('github-config.json?t=' + Date.now());
+        if (response.ok) {
+            gitHubConfig = await response.json();
+            console.log('Configurações globais do GitHub carregadas.');
+        }
+    } catch (e) {
+        console.warn('Não foi possível carregar github-config.json do repositório.', e);
     }
     
     checkLogin();
@@ -35,7 +47,7 @@ function checkLogin() {
         dashboardContainer.classList.add('active');
         logoutBtn.style.display = 'block';
         if (resetMenuBtn) resetMenuBtn.style.display = 'none';
-        if (configGithubBtn) configGithubBtn.style.display = 'block';
+        if (configGithubBtn) configGithubBtn.style.display = 'none';
         if (hasUnsavedChanges) saveChangesBtn.style.display = 'block';
         
         // Carrega dados se logado
@@ -56,6 +68,17 @@ function handleLogin(e) {
     
     if (password === 'andreia123') {
         sessionStorage.setItem('andreia_admin_logged', 'true');
+        sessionStorage.setItem('andreia_admin_password', password);
+        
+        // Se houver configuração global do GitHub carregada, descriptografa o token
+        if (gitHubConfig && gitHubConfig.encryptedToken) {
+            const token = decryptToken(gitHubConfig.encryptedToken, password);
+            if (token) {
+                sessionStorage.setItem('andreia_github_token', token);
+                console.log('Token do GitHub carregado a partir do repositório.');
+            }
+        }
+        
         showToast('Login realizado com sucesso!', 'success');
         checkLogin();
     } else {
@@ -65,6 +88,8 @@ function handleLogin(e) {
 
 function handleLogout() {
     sessionStorage.removeItem('andreia_admin_logged');
+    sessionStorage.removeItem('andreia_admin_password');
+    sessionStorage.removeItem('andreia_github_token');
     showToast('Você saiu do painel.', 'info');
     checkLogin();
 }
@@ -768,32 +793,35 @@ async function saveAllDataToServer() {
         }
     }
     
-    // Se não for localhost ou se a API local falhar, tenta salvar via GitHub
-    const savedConfig = localStorage.getItem('andreia_github_config');
-    if (!savedConfig) {
-        showToast('Para salvar na Vercel, configure a integração com o GitHub.', 'warning');
-        openGithubModal();
-        saveChangesBtn.innerText = originalText;
-        saveChangesBtn.disabled = false;
-        return;
-    }
-    
+    // Determina as credenciais do GitHub
     let repo, token, branch;
-    try {
-        const config = JSON.parse(savedConfig);
-        repo = config.repo;
-        token = config.token;
-        branch = config.branch || 'main';
-    } catch (e) {
-        showToast('Erro ao ler configuração do GitHub. Por favor, reconfigure.', 'error');
-        openGithubModal();
-        saveChangesBtn.innerText = originalText;
-        saveChangesBtn.disabled = false;
-        return;
+    
+    // 1. Tenta carregar do sessionStorage (descriptografado do repositório)
+    const sessionToken = sessionStorage.getItem('andreia_github_token');
+    if (sessionToken && gitHubConfig) {
+        repo = gitHubConfig.repo;
+        branch = gitHubConfig.branch || 'main';
+        token = sessionToken;
     }
     
+    // 2. Fallback para o localStorage
+    if (!token || !repo) {
+        const savedConfig = localStorage.getItem('andreia_github_config');
+        if (savedConfig) {
+            try {
+                const config = JSON.parse(savedConfig);
+                repo = config.repo;
+                token = config.token;
+                branch = config.branch || 'main';
+            } catch (e) {
+                console.error('Erro ao ler localStorage', e);
+            }
+        }
+    }
+    
+    // Se ainda não tiver credenciais, abre o modal de configuração
     if (!repo || !token) {
-        showToast('Configuração do GitHub incompleta! Por favor, configure.', 'warning');
+        showToast('Para salvar na Vercel, configure a integração com o GitHub.', 'warning');
         openGithubModal();
         saveChangesBtn.innerText = originalText;
         saveChangesBtn.disabled = false;
@@ -945,7 +973,7 @@ function closeGithubModal() {
     if (modal) modal.classList.remove('active');
 }
 
-function handleGithubConfigSubmit(e) {
+async function handleGithubConfigSubmit(e) {
     e.preventDefault();
     let repo = document.getElementById('ghRepo').value.trim();
     const branch = document.getElementById('ghBranch').value.trim();
@@ -972,10 +1000,54 @@ function handleGithubConfigSubmit(e) {
         repo = `${repoParts[0]}/${repoParts[1]}`;
     }
     
+    // Salva localmente (unencrypted) como fallback rápido no dispositivo do admin
     const config = { repo, branch, token };
     localStorage.setItem('andreia_github_config', JSON.stringify(config));
-    showToast('Configuração do GitHub salva com sucesso!', 'success');
+    sessionStorage.setItem('andreia_github_token', token);
+    
+    // Criptografa o token usando a senha do admin e salva de forma global no repositório
+    const password = sessionStorage.getItem('andreia_admin_password') || 'andreia123';
+    const encryptedToken = encryptToken(token, password);
+    gitHubConfig = { repo, branch, encryptedToken };
+    
+    showToast('Salvando configuração global no GitHub...', 'info');
+    try {
+        const configContent = JSON.stringify(gitHubConfig, null, 2);
+        const configSha = await getGithubFileSha(repo, 'github-config.json', branch, token);
+        await uploadToGithub(repo, 'github-config.json', branch, configContent, 'Configuração global do GitHub via painel admin', token, configSha);
+        showToast('Configuração salva globalmente e sincronizada!', 'success');
+    } catch (err) {
+        console.error('Falha ao salvar configuração global no GitHub', err);
+        showToast('Salvo apenas neste dispositivo: ' + err.message, 'warning');
+    }
+    
     closeGithubModal();
+}
+
+// Criptografa o token usando XOR simples com a senha
+function encryptToken(token, password) {
+    let result = '';
+    for (let i = 0; i < token.length; i++) {
+        const charCode = token.charCodeAt(i) ^ password.charCodeAt(i % password.length);
+        result += String.fromCharCode(charCode);
+    }
+    return btoa(unescape(encodeURIComponent(result)));
+}
+
+// Descriptografa o token usando XOR simples com a senha
+function decryptToken(encryptedStr, password) {
+    try {
+        const decoded = decodeURIComponent(escape(atob(encryptedStr)));
+        let result = '';
+        for (let i = 0; i < decoded.length; i++) {
+            const charCode = decoded.charCodeAt(i) ^ password.charCodeAt(i % password.length);
+            result += String.fromCharCode(charCode);
+        }
+        return result;
+    } catch (e) {
+        console.error("Falha ao descriptografar token", e);
+        return null;
+    }
 }
 
 // ==========================================
