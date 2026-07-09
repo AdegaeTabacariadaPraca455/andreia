@@ -1182,19 +1182,5 @@
     "id": "bebidas-quentes-4672",
     "title": "Bebidas Quentes",
     "products": []
-  },
-  {
-    "id": "teste-de-antigravity-7413",
-    "title": "Teste de Antigravity",
-    "products": [
-      {
-        "title": "Coxinha de Teste",
-        "description": "Teste descritivo",
-        "pricePrefix": "A partir de",
-        "price": "10,00",
-        "image": "IMG/Esfirra.jpg",
-        "variations": []
-      }
-    ]
   }
 ]

@@ -28,12 +28,14 @@ function checkLogin() {
     const logoutBtn = document.getElementById('logoutBtn');
     const saveChangesBtn = document.getElementById('saveChangesBtn');
     const resetMenuBtn = document.getElementById('resetMenuBtn');
+    const configGithubBtn = document.getElementById('configGithubBtn');
     
     if (isLogged) {
         loginWrapper.style.display = 'none';
         dashboardContainer.classList.add('active');
         logoutBtn.style.display = 'block';
         if (resetMenuBtn) resetMenuBtn.style.display = 'none';
+        if (configGithubBtn) configGithubBtn.style.display = 'block';
         if (hasUnsavedChanges) saveChangesBtn.style.display = 'block';
         
         // Carrega dados se logado
@@ -44,6 +46,7 @@ function checkLogin() {
         logoutBtn.style.display = 'none';
         saveChangesBtn.style.display = 'none';
         if (resetMenuBtn) resetMenuBtn.style.display = 'none';
+        if (configGithubBtn) configGithubBtn.style.display = 'none';
     }
 }
 
@@ -856,7 +859,18 @@ function setupEventListeners() {
     // Botão Salvar Geral
     document.getElementById('saveChangesBtn').addEventListener('click', saveAllDataToServer);
     
-
+    // Configurações do GitHub
+    const configGithubBtn = document.getElementById('configGithubBtn');
+    if (configGithubBtn) configGithubBtn.addEventListener('click', openGithubModal);
+    
+    const closeGithubModalBtn = document.getElementById('closeGithubModal');
+    if (closeGithubModalBtn) closeGithubModalBtn.addEventListener('click', closeGithubModal);
+    
+    const cancelGithubBtn = document.getElementById('cancelGithubBtn');
+    if (cancelGithubBtn) cancelGithubBtn.addEventListener('click', closeGithubModal);
+    
+    const githubConfigForm = document.getElementById('githubConfigForm');
+    if (githubConfigForm) githubConfigForm.addEventListener('submit', handleGithubConfigSubmit);
     
     // Modal fechar
     const closeAdminModal = document.getElementById('closeAdminModal');
@@ -887,6 +901,49 @@ function fecharModal() {
     const modal = document.getElementById('adminModal');
     modal.classList.remove('active');
     currentEditingItem = null;
+}
+
+// ==========================================
+// CONFIGURAÇÃO DO GITHUB
+// ==========================================
+function openGithubModal() {
+    const modal = document.getElementById('githubModal');
+    const savedConfig = localStorage.getItem('andreia_github_config');
+    
+    if (savedConfig) {
+        try {
+            const config = JSON.parse(savedConfig);
+            document.getElementById('ghRepo').value = config.repo || '';
+            document.getElementById('ghBranch').value = config.branch || 'main';
+            document.getElementById('ghToken').value = config.token || '';
+        } catch (e) {
+            console.error('Erro ao carregar configuração do GitHub', e);
+        }
+    }
+    
+    if (modal) modal.classList.add('active');
+}
+
+function closeGithubModal() {
+    const modal = document.getElementById('githubModal');
+    if (modal) modal.classList.remove('active');
+}
+
+function handleGithubConfigSubmit(e) {
+    e.preventDefault();
+    const repo = document.getElementById('ghRepo').value.trim();
+    const branch = document.getElementById('ghBranch').value.trim();
+    const token = document.getElementById('ghToken').value.trim();
+    
+    if (!repo || !token) {
+        showToast('Preencha os campos obrigatórios!', 'error');
+        return;
+    }
+    
+    const config = { repo, branch, token };
+    localStorage.setItem('andreia_github_config', JSON.stringify(config));
+    showToast('Configuração do GitHub salva com sucesso!', 'success');
+    closeGithubModal();
 }
 
 // ==========================================
