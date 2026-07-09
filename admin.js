@@ -11,6 +11,12 @@ let hasUnsavedChanges = false;
 // CONTROLE DE AUTENTICAÇÃO
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
+    // Exibe aviso se acessando via file://
+    if (window.location.protocol === 'file:') {
+        const warning = document.getElementById('fileProtocolWarning');
+        if (warning) warning.style.display = 'block';
+    }
+    
     checkLogin();
     setupEventListeners();
 });
