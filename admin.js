@@ -35,7 +35,7 @@ function checkLogin() {
         dashboardContainer.classList.add('active');
         logoutBtn.style.display = 'block';
         if (resetMenuBtn) resetMenuBtn.style.display = 'none';
-        if (configGithubBtn) configGithubBtn.style.display = 'block';
+        if (configGithubBtn) configGithubBtn.style.display = 'none';
         if (hasUnsavedChanges) saveChangesBtn.style.display = 'block';
         
         // Carrega dados se logado
@@ -673,11 +673,15 @@ function handleModalSubmit(e) {
 // SALVAR NO SERVIDOR (PERSISTÊNCIA & GITHUB)
 // ==========================================
 async function getGithubFileSha(repo, path, branch, token) {
-    const url = `https://api.github.com/repos/${repo}/contents/${path}?ref=${branch}`;
+    // Adiciona timestamp para forçar a API do GitHub a retornar o SHA mais recente
+    const url = `https://api.github.com/repos/${repo}/contents/${path}?ref=${branch}&t=${Date.now()}`;
     const response = await fetch(url, {
+        cache: 'no-store',
         headers: {
             'Authorization': `token ${token}`,
-            'Accept': 'application/vnd.github.v3+json'
+            'Accept': 'application/vnd.github.v3+json',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache'
         }
     });
     if (response.ok) {
@@ -727,9 +731,14 @@ async function saveAllDataToServer() {
     const resetMenuBtn = document.getElementById('resetMenuBtn');
     if (resetMenuBtn) resetMenuBtn.style.display = 'none';
     
+    const saveChangesBtn = document.getElementById('saveChangesBtn');
+    const originalText = saveChangesBtn.innerText;
+    saveChangesBtn.innerText = 'Atualizando...';
+    saveChangesBtn.disabled = true;
+    
     // Tenta primeiro salvar no servidor
     try {
-        showToast('Salvando alterações no servidor...', 'info');
+        showToast('Atualizando...', 'info');
         const res = await fetch('/api/menu', {
             method: 'POST',
             headers: {
@@ -743,9 +752,9 @@ async function saveAllDataToServer() {
             if (contentType && contentType.includes('application/json')) {
                 const data = await res.json();
                 if (data && data.status === 'success') {
-                    showToast('Cardápio sincronizado no servidor com sucesso!', 'success');
+                    showToast('Cardápio atualizado com sucesso!', 'success');
                     hasUnsavedChanges = false;
-                    document.getElementById('saveChangesBtn').style.display = 'none';
+                    saveChangesBtn.style.display = 'none';
                     return;
                 }
             }
@@ -754,6 +763,11 @@ async function saveAllDataToServer() {
         }
     } catch (err) {
         console.warn('Erro ao salvar no servidor via API, tentando GitHub...', err);
+    } finally {
+        if (!hasUnsavedChanges) {
+            saveChangesBtn.innerText = originalText;
+            saveChangesBtn.disabled = false;
+        }
     }
     
     // Se não for localhost ou se a API local falhar, tenta salvar via GitHub
@@ -761,6 +775,8 @@ async function saveAllDataToServer() {
     if (!savedConfig) {
         showToast('Para salvar na Vercel, configure a integração com o GitHub.', 'warning');
         openGithubModal();
+        saveChangesBtn.innerText = originalText;
+        saveChangesBtn.disabled = false;
         return;
     }
     
@@ -773,36 +789,38 @@ async function saveAllDataToServer() {
     } catch (e) {
         showToast('Erro ao ler configuração do GitHub. Por favor, reconfigure.', 'error');
         openGithubModal();
+        saveChangesBtn.innerText = originalText;
+        saveChangesBtn.disabled = false;
         return;
     }
     
     if (!repo || !token) {
         showToast('Configuração do GitHub incompleta! Por favor, configure.', 'warning');
         openGithubModal();
+        saveChangesBtn.innerText = originalText;
+        saveChangesBtn.disabled = false;
         return;
     }
     
-    const saveChangesBtn = document.getElementById('saveChangesBtn');
-    const originalText = saveChangesBtn.innerText;
-    saveChangesBtn.innerText = 'Salvando...';
+    // Tenta salvar via GitHub
+    saveChangesBtn.innerText = 'Atualizando...';
     saveChangesBtn.disabled = true;
     
     try {
-        showToast('Sincronizando com o GitHub...', 'info');
+        showToast('Atualizando...', 'info');
+        
+        const jsonContent = JSON.stringify(menuData, null, 2);
         
         // 1. Enviar cardapio.json
-        showToast('Atualizando cardapio.json no GitHub...', 'info');
-        const jsonContent = JSON.stringify(menuData, null, 2);
         const jsonSha = await getGithubFileSha(repo, 'cardapio.json', branch, token);
         await uploadToGithub(repo, 'cardapio.json', branch, jsonContent, 'Atualização de cardapio.json via painel admin', token, jsonSha);
         
         // 2. Enviar cardapio-data.js
-        showToast('Atualizando cardapio-data.js no GitHub...', 'info');
         const jsContent = 'window.cardapioData = ' + jsonContent + ';';
         const jsSha = await getGithubFileSha(repo, 'cardapio-data.js', branch, token);
         await uploadToGithub(repo, 'cardapio-data.js', branch, jsContent, 'Atualização de cardapio-data.js via painel admin', token, jsSha);
         
-        showToast('Sucesso! O cardápio foi atualizado e o deploy na Vercel iniciará em instantes.', 'success');
+        showToast('Cardápio atualizado com sucesso!', 'success');
         
         hasUnsavedChanges = false;
         saveChangesBtn.style.display = 'none';
