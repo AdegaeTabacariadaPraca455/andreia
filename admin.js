@@ -35,7 +35,7 @@ function checkLogin() {
         dashboardContainer.classList.add('active');
         logoutBtn.style.display = 'block';
         if (resetMenuBtn) resetMenuBtn.style.display = 'none';
-        if (configGithubBtn) configGithubBtn.style.display = 'none';
+        if (configGithubBtn) configGithubBtn.style.display = 'block';
         if (hasUnsavedChanges) saveChangesBtn.style.display = 'block';
         
         // Carrega dados se logado
@@ -949,13 +949,29 @@ function closeGithubModal() {
 
 function handleGithubConfigSubmit(e) {
     e.preventDefault();
-    const repo = document.getElementById('ghRepo').value.trim();
+    let repo = document.getElementById('ghRepo').value.trim();
     const branch = document.getElementById('ghBranch').value.trim();
     const token = document.getElementById('ghToken').value.trim();
     
     if (!repo || !token) {
         showToast('Preencha os campos obrigatórios!', 'error');
         return;
+    }
+    
+    // Tratamento inteligente caso o usuário cole a URL completa do repositório
+    if (repo.includes('github.com/')) {
+        const parts = repo.split('github.com/');
+        if (parts.length > 1) {
+            repo = parts[1];
+        }
+    }
+    // Remove barras iniciais ou finais extras
+    repo = repo.replace(/^\/+|\/+$/g, '');
+    
+    // Garante o formato 'usuario/repositorio'
+    const repoParts = repo.split('/');
+    if (repoParts.length >= 2) {
+        repo = `${repoParts[0]}/${repoParts[1]}`;
     }
     
     const config = { repo, branch, token };
