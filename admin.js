@@ -678,10 +678,8 @@ async function getGithubFileSha(repo, path, branch, token) {
     const response = await fetch(url, {
         cache: 'no-store',
         headers: {
-            'Authorization': `token ${token}`,
-            'Accept': 'application/vnd.github.v3+json',
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache'
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/vnd.github.v3+json'
         }
     });
     if (response.ok) {
@@ -713,7 +711,7 @@ async function uploadToGithub(repo, path, branch, content, message, token, sha) 
     const response = await fetch(url, {
         method: 'PUT',
         headers: {
-            'Authorization': `token ${token}`,
+            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
             'Accept': 'application/vnd.github.v3+json'
         },
