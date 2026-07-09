@@ -216,14 +216,6 @@ window.cardapioData = [
             "price": "150,00"
           }
         ]
-      },
-      {
-        "title": "tst",
-        "description": "std",
-        "pricePrefix": "A partir de",
-        "price": "41",
-        "image": "IMG/baguete.jpg",
-        "variations": []
       }
     ]
   },
