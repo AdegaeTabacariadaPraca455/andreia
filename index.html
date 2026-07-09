@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panificadora Andréia - Cardápio Digital</title>
+    <link rel="icon" type="image/jpeg" href="logo.jpg">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=2.0">
+</head>
+<body>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <img src="logo.jpg" alt="Panificadora Andréia" class="logo-img" onerror="this.style.display='none'">
+            <div class="info-pill-container">
+                <button class="info-pill" id="infoPillBtn" aria-expanded="false" title="Ver informações">
+                    <!-- Clock -->
+                    <svg class="icon-clock text-green" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <!-- Mail -->
+                    <svg class="icon-mail" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                    <!-- Marker -->
+                    <svg class="icon-pin" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                    <!-- Chevron -->
+                    <svg class="icon-chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+                <div class="info-dropdown" id="infoDropdown">
+                    <strong style="color:var(--text-main);">Horários:</strong>
+                    <p class="hours-text">
+                        Seg a Sábado: 06:00 às 21:00<br>
+                        Domingo: 06:30 às 13:30<br>
+                        Feriados: 06:30 às 20:00
+                    </p>
+                    <hr style="margin: 10px 0; border: 0; border-top: 1px solid var(--border-color);">
+                    <strong style="color:var(--text-main);">Endereço:</strong>
+                    <p class="hours-text">R. Conselheiro Joaquim Caetano, 1530<br>Nova Granada, Belo Horizonte - MG</p>
+                    <hr style="margin: 10px 0; border: 0; border-top: 1px solid var(--border-color);">
+                    <strong style="color:var(--text-main);">Contato:</strong>
+                    <p class="hours-text" style="margin-bottom: 5px;">Realize suas encomendas</p>
+                    <p class="hours-text" style="font-size: 1rem; color: var(--primary-color);"><strong>Celular: (31) 98468-4088</strong></p>
+                    <p class="hours-text" style="font-size: 1rem; color: var(--primary-color);"><strong>Fixo: (31) 3334-9198</strong></p>
+                    <a href="https://api.whatsapp.com/send/?phone=553198468-4088&text=Ol%C3%A1%2C+V%C3%AD+o+Card%C3%A1pio+e+quero+realizar+um+pedido&type=phone_number&app_absent=0" target="_blank" class="btn-whatsapp">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="vertical-align: middle; margin-right: 8px;"><path d="M12.004 2c-5.518 0-9.996 4.477-9.996 9.995 0 1.764.459 3.486 1.332 5.006L2 22l5.147-1.352c1.472.802 3.125 1.228 4.854 1.228h.003c5.517 0 9.996-4.477 9.996-9.995C22 6.478 17.521 2 12.004 2zm0 1.862c4.484 0 8.133 3.648 8.133 8.133 0 4.484-3.649 8.133-8.133 8.133-1.498 0-2.964-.412-4.247-1.192l-.304-.185-3.159.83.844-3.08-.204-.325c-.837-1.339-1.28-2.883-1.28-4.478.001-4.485 3.65-8.133 8.133-8.133zm-2.915 2.923c-.167 0-.348.043-.497.127-.148.083-1.127 1.101-1.127 2.684 0 1.583 1.152 3.115 1.312 3.33.16.216 2.213 3.38 5.362 4.743.749.324 1.334.518 1.792.664.753.239 1.439.206 1.982.125.604-.09 1.862-.761 2.127-1.496.265-.735.265-1.365.186-1.496-.079-.131-.29-.211-.609-.371-.319-.16-1.862-.919-2.148-1.022-.286-.103-.493-.155-.701.156-.207.311-.803.996-.983 1.202-.18.207-.361.233-.68.073-.319-.16-1.348-.497-2.568-1.586-.949-.846-1.59-1.892-1.776-2.21-.186-.319-.02-.491.14-.65.143-.143.319-.371.478-.557.16-.186.213-.319.319-.531.106-.213.053-.399-.027-.558-.08-.16-.701-1.688-.96-2.311-.252-.607-.51-.523-.701-.532l-.59-.011z"/></svg>Pedir no WhatsApp
+                    </a>
+                </div>
+            </div>
+            <button class="hamburger" id="hamburger" aria-label="Abrir menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+        <nav class="sidebar-nav" id="sidebarNav">
+            <ul style="padding-top:10px;" id="sidebarNavList">
+                <!-- Sidebar categories links will be rendered dynamically -->
+            </ul>
+        </nav>
+        <div class="sidebar-footer" id="sidebarFooter">
+            <div class="contact-info">
+                <strong style="display:block; margin-bottom:5px; color:var(--text-main);">Horários:</strong>
+                <p class="hours-text">
+                    Seg a Sábado: 06:00 às 21:00<br>
+                    Domingo: 06:30 às 13:30<br>
+                    Feriados: 06:30 às 20:00
+                </p>
+                <hr style="margin: 10px 0; border: 0; border-top: 1px solid var(--border-color);">
+                <p>R. Conselheiro Joaquim Caetano, 1530<br>Nova Granada, Belo Horizonte - MG</p>
+                <div style="margin-top: 10px; margin-bottom: 10px;">
+                    <a href="https://www.instagram.com/panificadoraandreia/" target="_blank" style="display:inline-block; margin-right:10px;">Instagram</a>
+                    <a href="admin.html" style="display:inline-block; color: var(--primary-color); font-weight: bold;">Painel Admin</a>
+                </div>
+                <p class="hours-text" style="margin-bottom:5px; font-size: 1rem; color: var(--primary-color);"><strong>Celular: (31) 98468-4088</strong></p>
+                <p class="hours-text" style="margin-bottom:5px; font-size: 1rem; color: var(--primary-color);"><strong>Fixo: (31) 3334-9198</strong></p>
+                <a href="https://api.whatsapp.com/send/?phone=553198468-4088&text=Ol%C3%A1%2C+V%C3%AD+o+Card%C3%A1pio+e+quero+realizar+um+pedido&type=phone_number&app_absent=0" target="_blank" class="btn-whatsapp">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="vertical-align: middle; margin-right: 8px;"><path d="M12.004 2c-5.518 0-9.996 4.477-9.996 9.995 0 1.764.459 3.486 1.332 5.006L2 22l5.147-1.352c1.472.802 3.125 1.228 4.854 1.228h.003c5.517 0 9.996-4.477 9.996-9.995C22 6.478 17.521 2 12.004 2zm0 1.862c4.484 0 8.133 3.648 8.133 8.133 0 4.484-3.649 8.133-8.133 8.133-1.498 0-2.964-.412-4.247-1.192l-.304-.185-3.159.83.844-3.08-.204-.325c-.837-1.339-1.28-2.883-1.28-4.478.001-4.485 3.65-8.133 8.133-8.133zm-2.915 2.923c-.167 0-.348.043-.497.127-.148.083-1.127 1.101-1.127 2.684 0 1.583 1.152 3.115 1.312 3.33.16.216 2.213 3.38 5.362 4.743.749.324 1.334.518 1.792.664.753.239 1.439.206 1.982.125.604-.09 1.862-.761 2.127-1.496.265-.735.265-1.365.186-1.496-.079-.131-.29-.211-.609-.371-.319-.16-1.862-.919-2.148-1.022-.286-.103-.493-.155-.701.156-.207.311-.803.996-.983 1.202-.18.207-.361.233-.68.073-.319-.16-1.348-.497-2.568-1.586-.949-.846-1.59-1.892-1.776-2.21-.186-.319-.02-.491.14-.65.143-.143.319-.371.478-.557.16-.186.213-.319.319-.531.106-.213.053-.399-.027-.558-.08-.16-.701-1.688-.96-2.311-.252-.607-.51-.523-.701-.532l-.59-.011z"/></svg>Pedir no WhatsApp
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <section class="hero" id="topo">
+            <div class="hero-content">
+                <h1>BEM VINDOS!</h1>
+                <p>Descubra produtos deliciosos, fresquinhos e feitos com muito carinho para você.</p>
+                <div style="margin-top: 15px;">
+                    <a href="#cardapio-inicio" class="btn-primary">Ver Cardápio</a>
+                </div>
+                <div style="margin-top: 20px;">
+                    <a href="https://www.instagram.com/panificadoraandreia/" target="_blank" style="display:inline-block; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'" title="Siga nosso Instagram!">
+                        <img src="instagram-icon.png" alt="Siga nosso Instagram" style="width: 50px; height: 50px; border-radius: 50%; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- MENU HORIZONTAL DE CATEGORIAS -->
+        <nav class="horizontal-nav" id="cardapio-inicio">
+            <ul class="h-nav-list" id="horizontalNavList">
+                <!-- Horizontal categories will be rendered dynamically -->
+            </ul>
+        </nav>
+
+        <!-- BARRA DE PESQUISA -->
+        <div class="search-section">
+            <div class="search-container">
+                <svg class="search-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="searchInput" placeholder="Buscar produtos...">
+                <button id="clearSearchBtn" class="clear-search-btn" style="display: none;">&times;</button>
+            </div>
+        </div>
+
+        <div class="menu-sections" id="menuSections">
+            <!-- Products sections will be rendered dynamically -->
+            <div class="loading-spinner">Carregando cardápio...</div>
+        </div>
+
+        <footer style="text-align: center; padding: 30px 20px 40px; background: #fafafa; border-top: 1px solid #eee; margin-top: 40px; width: 100%;">
+            <p style="font-size: 0.8rem; color: #777; font-style: italic; margin-bottom: 8px;">
+                *Imagens são ilustrativas e os valores podem sofrer alterações consultar.*
+            </p>
+            <p style="font-size: 0.85rem; color: #555;">&copy; 2026 Panificadora Andréia. Todos os direitos reservados.</p>
+        </footer>
+    </main>
+
+    <!-- MODAL POPUP DETALHES -->
+    <div id="productModal" class="modal-overlay">
+        <div class="modal-content">
+            <button id="closeModal" class="modal-close" aria-label="Fechar">&times;</button>
+            <div class="modal-header-bg">
+                <h3 id="modalTitle" class="modal-title">Detalhes</h3>
+                <p id="modalObs" class="modal-obs"></p>
+            </div>
+            <div id="modalImage" class="modal-product-image" style="display: none;"></div>
+            <div class="modal-body">
+                <ul id="modalVariations" class="modal-variations-list">
+                    <!-- Variations loaded dynamically with Add To Cart controls -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- CART FLOATING BUTTON -->
+    <button id="cartToggleBtn" class="cart-float-btn" aria-label="Ver Carrinho">
+        <!-- SVG Cart Icon -->
+        <svg class="icon-cart" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="9" cy="21" r="1"></circle>
+            <circle cx="20" cy="21" r="1"></circle>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+        </svg>
+        <span id="cartCountBadge" class="cart-count-badge" style="display: none;">0</span>
+    </button>
+
+    <!-- CART SLIDE-OUT DRAWER -->
+    <div id="cartDrawer" class="cart-drawer">
+        <div class="cart-drawer-header">
+            <h3>Seu Pedido</h3>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <button id="clearCartBtn" style="background: none; border: none; color: var(--text-muted); font-size: 0.8rem; cursor: pointer; text-decoration: underline; font-family: inherit; display: none;">Limpar Tudo</button>
+                <button id="closeCartDrawer" class="close-drawer-btn" aria-label="Fechar carrinho">&times;</button>
+            </div>
+        </div>
+        <div class="cart-drawer-body">
+            <div id="cartItemsList" class="cart-items-list">
+                <!-- Cart items loaded dynamically -->
+                <p class="empty-cart-msg">Seu carrinho está vazio.</p>
+            </div>
+            
+            <div id="cartCheckoutArea" style="display: none; margin-top: 20px;">
+                <div class="cart-summary">
+                    <div class="cart-total-line">
+                        <span>Total:</span>
+                        <strong id="cartSubtotal">R$ 0,00</strong>
+                    </div>
+                </div>
+                
+                <form id="checkoutForm" class="checkout-form">
+                    <h4>Informações do Pedido</h4>
+                    <div class="form-group">
+                        <label for="clientName">Seu Nome *</label>
+                        <input type="text" id="clientName" required placeholder="Digite seu nome completo">
+                    </div>
+                    <div class="form-group">
+                        <label for="deliveryType">Tipo de Entrega *</label>
+                        <select id="deliveryType" required>
+                            <option value="retirada">Retirar na Panificadora</option>
+                            <option value="entrega">Entrega em Domicílio</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="addressGroup" style="display: none;">
+                        <label for="clientAddress">Endereço de Entrega *</label>
+                        <textarea id="clientAddress" placeholder="Rua, número, complemento, bairro e referência"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="paymentMethod">Forma de Pagamento *</label>
+                        <select id="paymentMethod" required>
+                            <option value="Pix">Pix</option>
+                            <option value="Cartão de Crédito">Cartão de Crédito</option>
+                            <option value="Cartão de Débito">Cartão de Débito</option>
+                            <option value="Dinheiro">Dinheiro</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="changeGroup" style="display: none;">
+                        <label for="cashChange">Troco para quanto?</label>
+                        <input type="text" id="cashChange" placeholder="Ex: R$ 50,00">
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="cart-drawer-footer" id="cartDrawerFooter" style="display: none;">
+            <button id="sendOrderBtn" class="btn-whatsapp-order">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="vertical-align: middle; margin-right: 8px;"><path d="M12.004 2c-5.518 0-9.996 4.477-9.996 9.995 0 1.764.459 3.486 1.332 5.006L2 22l5.147-1.352c1.472.802 3.125 1.228 4.854 1.228h.003c5.517 0 9.996-4.477 9.996-9.995C22 6.478 17.521 2 12.004 2zm0 1.862c4.484 0 8.133 3.648 8.133 8.133 0 4.484-3.649 8.133-8.133 8.133-1.498 0-2.964-.412-4.247-1.192l-.304-.185-3.159.83.844-3.08-.204-.325c-.837-1.339-1.28-2.883-1.28-4.478.001-4.485 3.65-8.133 8.133-8.133zm-2.915 2.923c-.167 0-.348.043-.497.127-.148.083-1.127 1.101-1.127 2.684 0 1.583 1.152 3.115 1.312 3.33.16.216 2.213 3.38 5.362 4.743.749.324 1.334.518 1.792.664.753.239 1.439.206 1.982.125.604-.09 1.862-.761 2.127-1.496.265-.735.265-1.365.186-1.496-.079-.131-.29-.211-.609-.371-.319-.16-1.862-.919-2.148-1.022-.286-.103-.493-.155-.701.156-.207.311-.803.996-.983 1.202-.18.207-.361.233-.68.073-.319-.16-1.348-.497-2.568-1.586-.949-.846-1.59-1.892-1.776-2.21-.186-.319-.02-.491.14-.65.143-.143.319-.371.478-.557.16-.186.213-.319.319-.531.106-.213.053-.399-.027-.558-.08-.16-.701-1.688-.96-2.311-.252-.607-.51-.523-.701-.532l-.59-.011z"/></svg>Enviar Pedido no WhatsApp
+            </button>
+        </div>
+    </div>
+
+    <!-- CART OVERLAY BACKGROUND -->
+    <div id="cartOverlay" class="cart-overlay-bg"></div>
+
+    <script src="cardapio-data.js?v=3.0"></script>
+    <script src="script.js?v=3.0"></script>
+</body>
+</html>
