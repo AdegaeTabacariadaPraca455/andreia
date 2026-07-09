@@ -759,8 +759,8 @@ async function saveAllDataToServer() {
     // Se não for localhost ou se a API local falhar, tenta salvar via GitHub
     const savedConfig = localStorage.getItem('andreia_github_config');
     if (!savedConfig) {
-        showToast('Integração com GitHub não configurada! Baixando backup...', 'error');
-        downloadBackupJson();
+        showToast('Para salvar na Vercel, configure a integração com o GitHub.', 'warning');
+        openGithubModal();
         return;
     }
     
@@ -771,14 +771,14 @@ async function saveAllDataToServer() {
         token = config.token;
         branch = config.branch || 'main';
     } catch (e) {
-        showToast('Erro ao ler configuração do GitHub! Baixando backup...', 'error');
-        downloadBackupJson();
+        showToast('Erro ao ler configuração do GitHub. Por favor, reconfigure.', 'error');
+        openGithubModal();
         return;
     }
     
     if (!repo || !token) {
-        showToast('Configurações do GitHub incompletas! Baixando backup...', 'error');
-        downloadBackupJson();
+        showToast('Configuração do GitHub incompleta! Por favor, configure.', 'warning');
+        openGithubModal();
         return;
     }
     
