@@ -226,13 +226,13 @@ window.cardapioData = [
     "products": [
       {
         "title": "Tabuleiros de Bolo e Cake",
-        "description": "Bolo comum 100,00 / Especial Cake 120,00",
+        "description": "Fresquinhos, macios e preparados com aquele sabor caseiro que combina com qualquer momento. Escolha seu sabor favorito e aproveite!",
         "pricePrefix": "A partir de",
         "price": "100,00",
         "image": "IMG/Tabuleiro de bolo.jpg",
         "variations": [
           {
-            "name": "Tabuleiro de bolo (comum, coco, laranja etc )",
+            "name": "Tabuleiro de bolo  comum",
             "price": "100,00"
           },
           {
@@ -240,8 +240,60 @@ window.cardapioData = [
             "price": "120,00"
           },
           {
-            "name": "(Sabores: Tapioca, Multicereais, Milho, Indiano, Braune, Chocolate, Tone, Cenoura, Banana c/ Granola, Pão de mel, Fubá, Laranja)",
-            "price": "-"
+            "name": "Tabuleiro de Cake Tapioca",
+            "price": "120,00"
+          },
+          {
+            "name": "Tabuleiro de bolo sabor coco",
+            "price": "100,00"
+          },
+          {
+            "name": "Tabuleiro de bolo sabor laranja",
+            "price": "100,00"
+          },
+          {
+            "name": "Tabuleiro de Cake Multicereais",
+            "price": "120,00"
+          },
+          {
+            "name": "Tabuleiro de Cake Milho",
+            "price": "120,00"
+          },
+          {
+            "name": "Tabuleiro de Cake Indiano",
+            "price": "120,00"
+          },
+          {
+            "name": "Tabuleiro de Cake Braune",
+            "price": "120,00"
+          },
+          {
+            "name": "Tabuleiro de Cake Chocolate",
+            "price": "120,00"
+          },
+          {
+            "name": "Tabuleiro de Cake Tone",
+            "price": "120,00"
+          },
+          {
+            "name": "Tabuleiro de Cake Cenoura",
+            "price": "120,00"
+          },
+          {
+            "name": "Tabuleiro de Cake  Banana c/ Granola",
+            "price": "120,00"
+          },
+          {
+            "name": "Tabuleiro de Cake Pão de mel",
+            "price": "120,00"
+          },
+          {
+            "name": "Tabuleiro de Cake Fubá",
+            "price": "120,00"
+          },
+          {
+            "name": "Tabuleiro de Cake Laranja",
+            "price": "120,00"
           }
         ]
       },
