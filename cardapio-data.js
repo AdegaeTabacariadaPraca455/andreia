@@ -299,7 +299,7 @@ window.cardapioData = [
       },
       {
         "title": "Bolos Redondos",
-        "description": "Cenoura c/ chocolate ou Limão. Grande: 70,00 / Pequeno 25,00",
+        "description": "Bolos fresquinhos, macios e cheios de sabor, ideal para acompanhar aquele café quentinho. Perfeitos para o café da manhã ou da tarde.",
         "pricePrefix": "A partir de",
         "price": "25,00",
         "image": "IMG/Bolos Redondos.jpg",
@@ -332,7 +332,7 @@ window.cardapioData = [
       },
       {
         "title": "Roscas e Brioches",
-        "description": "Rosca c/ frutas, abacaxi, coco: 18,00 / Brioche: 25,00",
+        "description": "Uma seleção de roscas e brioches, doces e salgados, para quem gosta de um toque especial na refeição. Diferentes sabores, formatos e recheios para escolher o seu favorito.",
         "pricePrefix": "A partir de",
         "price": "18,00",
         "image": "IMG/Rosca Doce.jpg",
