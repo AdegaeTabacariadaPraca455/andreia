@@ -228,72 +228,72 @@
         "title": "Tabuleiros de Bolo e Cake",
         "description": "Fresquinhos, macios e preparados com aquele sabor caseiro que combina com qualquer momento. Escolha seu sabor favorito e aproveite!",
         "pricePrefix": "A partir de",
-        "price": "100,00",
+        "price": "120,00",
         "image": "IMG/Tabuleiro de bolo.jpg",
         "variations": [
           {
             "name": "Tabuleiro de bolo  comum",
-            "price": "100,00"
+            "price": "120,00"
           },
           {
             "name": "Tabuleiro de Cake",
-            "price": "120,00"
+            "price": "150,00"
           },
           {
             "name": "Tabuleiro de Cake Tapioca",
-            "price": "120,00"
+            "price": "150,00"
           },
           {
             "name": "Tabuleiro de bolo sabor coco",
-            "price": "100,00"
+            "price": "120,00"
           },
           {
             "name": "Tabuleiro de bolo sabor laranja",
-            "price": "100,00"
+            "price": "120,00"
           },
           {
             "name": "Tabuleiro de Cake Multicereais",
-            "price": "120,00"
+            "price": "150,00"
           },
           {
             "name": "Tabuleiro de Cake Milho",
-            "price": "120,00"
+            "price": "150,00"
           },
           {
             "name": "Tabuleiro de Cake Indiano",
-            "price": "120,00"
+            "price": "150,00"
           },
           {
             "name": "Tabuleiro de Cake Braune",
-            "price": "120,00"
+            "price": "150,00"
           },
           {
             "name": "Tabuleiro de Cake Chocolate",
-            "price": "120,00"
+            "price": "150,00"
           },
           {
             "name": "Tabuleiro de Cake Tone",
-            "price": "120,00"
+            "price": "150,00"
           },
           {
             "name": "Tabuleiro de Cake Cenoura",
-            "price": "120,00"
+            "price": "150,00"
           },
           {
             "name": "Tabuleiro de Cake  Banana c/ Granola",
-            "price": "120,00"
+            "price": "150,00"
           },
           {
             "name": "Tabuleiro de Cake Pão de mel",
-            "price": "120,00"
+            "price": "150,00"
           },
           {
             "name": "Tabuleiro de Cake Fubá",
-            "price": "120,00"
+            "price": "150,00"
           },
           {
             "name": "Tabuleiro de Cake Laranja",
-            "price": "120,00"
+            "price": "150,00"
           }
         ]
       },
@@ -322,11 +322,11 @@
           },
           {
             "name": "Bolo comum",
-            "price": "8,50"
+            "price": "9,50"
           },
           {
             "name": "Bolo Cremoso",
-            "price": "12,00"
+            "price": "15,00"
           }
         ]
       },
@@ -339,15 +339,15 @@
         "variations": [
           {
             "name": "Rosca c/ frutas",
-            "price": "18,00"
+            "price": "22,00"
           },
           {
             "name": "Rosca c/ Abacaxi",
-            "price": "18,00"
+            "price": "22,00"
           },
           {
             "name": "Rosca c/ Coco",
-            "price": "18,00"
+            "price": "22,00"
           },
           {
             "name": "Rosca Salgada",
@@ -359,7 +359,7 @@
           },
           {
             "name": "Brioche",
-            "price": "25,00"
+            "price": "30,00"
           }
         ]
       },
@@ -372,15 +372,15 @@
         "variations": [
           {
             "name": "Mine Pão",
-            "price": "65,00 / cento"
+            "price": "70,00 / cento"
           },
           {
             "name": "Mini Pão Sírio",
-            "price": "85,00 / cento"
+            "price": "90,00 / cento"
           },
           {
             "name": "Pão de Ló",
-            "price": "80,00 / un"
+            "price": "100,00 / un"
           },
           {
             "name": "Pão Francês 50g",
@@ -497,7 +497,7 @@
           },
           {
             "name": "Torta de legumes",
-            "price": "100,00"
+            "price": "120,00"
           }
         ]
       }
@@ -549,19 +549,19 @@
           },
           {
             "name": "Tamanho Médio (30 pessoas - 35 cm)",
-            "price": "195,00"
+            "price": "230,00"
           },
           {
             "name": "Tamanho Grande (50 pessoas - 30x40)",
-            "price": "280,00"
+            "price": "350,00"
           },
           {
             "name": "Tamanho Extra Grande (80 pessoas)",
-            "price": "330,00"
+            "price": "400,00"
           },
           {
             "name": "Tamanho GGG (150 pessoas - 40x65)",
-            "price": "550,00"
+            "price": "800,00"
           },
           {
             "name": "*Valor fixo por tamanho, independente do sabor escolhido.*",
@@ -581,11 +581,11 @@
             "price": "-"
           },
           {
-            "name": "PPP: 120,00 / PP: 160,00 / Peq: 195,00",
+            "name": "PPP: 120,00 / PP: 160,00 / Peq: 230,00",
             "price": "-"
           },
           {
-            "name": "Méd: 280,00 / Grad: 330,00 / Extra G: 550,00",
+            "name": "Méd: 350,00 / Grad: 400,00 / Extra G: 800,00",
             "price": "-"
           },
           {
@@ -593,11 +593,11 @@
             "price": "-"
           },
           {
-            "name": "Pequena: 220,00 / Médio: 295,00 / Grande: 380,00",
+            "name": "Pequena: 250,00 / Médio: 350,00 /",
             "price": "-"
           },
           {
-            "name": "Extra Grande: 550,00 / GGG: 800,00",
+            "name": "Grande: 400,00Extra Grande: 800,00",
             "price": "-"
           },
           {
@@ -605,7 +605,7 @@
             "price": "-"
           },
           {
-            "name": "Peq: 150,00 / Méd: 180,00 / Grad: 300,00",
+            "name": "Peq: 180,00 / Méd: 220,00 / Grad: 350,00",
             "price": "-"
           },
           {
@@ -613,11 +613,11 @@
             "price": "-"
           },
           {
-            "name": "PPP: 120,00 / PP: 160,00 / Peq: 195,00",
+            "name": "PPP: 120,00 / PP: 160,00 / Peq: 230,00",
             "price": "-"
           },
           {
-            "name": "Méd: 280,00 / Grad: 330,00 / Extra G: 550,00",
+            "name": "Méd: 350,00 / Grad: 400,00 / Extra G: 800,00",
             "price": "-"
           },
           {
@@ -626,7 +626,7 @@
           },
           {
             "name": "Unidade",
-            "price": "85,00"
+            "price": "95,00"
           }
         ]
       }
@@ -640,40 +640,40 @@
         "title": "Doces Tradicionais",
         "description": "Brigadeiro, Cajuzinho, Moranguinho, Palha italiana, etc.",
         "pricePrefix": "R$",
-        "price": "145,00",
+        "price": "160,00",
         "image": "IMG/Doces tradicionais.jpg",
         "variations": [
           {
             "name": "Brigadeiro",
-            "price": "145,00"
+            "price": "160,00"
           },
           {
             "name": "Olho de sogra",
-            "price": "145,00"
+            "price": "160,00"
           },
           {
             "name": "Cajuzinho",
-            "price": "145,00"
+            "price": "160,00"
           },
           {
             "name": "Chapéu de Napoleão",
-            "price": "145,00"
+            "price": "160,00"
           },
           {
             "name": "Moranguinho",
-            "price": "145,00"
+            "price": "160,00"
           },
           {
             "name": "Palha Italiana",
-            "price": "145,00"
+            "price": "160,00"
           },
           {
             "name": "Coco – “ cocadinha",
-            "price": "145,00"
+            "price": "160,00"
           },
           {
             "name": "Beijinho (ninho, côco)",
-            "price": "145,00"
+            "price": "160,00"
           }
         ]
       },
@@ -681,32 +681,32 @@
         "title": "Bombons e Especiais",
         "description": "Bombons Brigadeiro/Coco/Abacaxi: 220,00 a 250,00 / Quindim 180,00",
         "pricePrefix": "A partir de",
-        "price": "180,00",
+        "price": "250,00",
         "image": "IMG/Bombons eseciais.jpg",
         "variations": [
           {
             "name": "Quindim",
-            "price": "180,00"
+            "price": "200,00"
           },
           {
             "name": "Brigadeiro",
-            "price": "220,00"
+            "price": "250,00"
           },
           {
             "name": "Abacaxi",
-            "price": "250,00"
+            "price": "280,00"
           },
           {
             "name": "Uva",
-            "price": "250,00"
+            "price": "280,00"
           },
           {
             "name": "Coco",
-            "price": "220,00"
+            "price": "250,00"
           },
           {
             "name": "Nozes",
-            "price": "250,00"
+            "price": "280,00"
           }
         ]
       },
@@ -723,7 +723,7 @@
           },
           {
             "name": "Cup Cake Grande (Unidade)",
-            "price": "7,00"
+            "price": "8,00"
           }
         ]
       }
@@ -1161,16 +1161,16 @@
         "title": "Pizza Gigante",
         "description": "Pizza à moda da casa ou Frango c/ Catupiry",
         "pricePrefix": "A partir de",
-        "price": "49,90",
+        "price": "69,90",
         "image": "IMG/pizza.jpg",
         "variations": [
           {
             "name": "Pizza gigante à moda da casa",
-            "price": "49,90"
+            "price": "69,90"
           },
           {
             "name": "Pizza de frango com catupiry",
-            "price": "59,90"
+            "price": "69,90"
           }
         ]
       }
